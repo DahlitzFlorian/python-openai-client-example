@@ -1,16 +1,11 @@
+import argparse
+import configparser
 import time
+from pathlib import Path
 
 import openai
 import pydantic
 from openai import OpenAI
-
-client = OpenAI(
-    api_key="examplekey01",
-    base_url="http://129.40.60.17:8080",
-    default_headers={
-        "Content-Type": "application/json",
-    },
-)
 
 
 class Statistics(pydantic.BaseModel):
@@ -37,7 +32,31 @@ def print_statistics(response: openai.Completion, delta: float):
     print(f"Total tokens/s (self): {(statistics.prompt_n + statistics.predicted_n) / delta}")
 
 
-def main():
+def get_parser() -> argparse.ArgumentParser:
+    _parser = argparse.ArgumentParser()
+    _parser.add_argument(
+        "--config-path",
+        help="Path to the config file (INI-format)",
+        default=Path(__file__).parent / "config.ini",
+        type=Path,
+    )
+
+    return _parser
+
+
+def main(config_path: Path):
+    config = configparser.ConfigParser()
+    with open(config_path) as f:
+        config.read_file(f)
+
+    client = OpenAI(
+        api_key=config["host"]["api_key"],
+        base_url=config["host"]["base_url"],
+        default_headers={
+            "Content-Type": "application/json",
+        },
+    )
+    
     prompt = input("Prompt: ")
     if not prompt:
         prompt = "Question: What is the capital city of Germany? Answer: "
@@ -60,4 +79,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = get_parser()
+    args = parser.parse_args()
+    main(args.config_path)

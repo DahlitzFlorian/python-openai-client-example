@@ -10,6 +10,7 @@ Ansible playbooks for setting up llama.cpp on IBM Power (ppc64le) can be found h
 ## Usage
 
 Create a virtual environment, install the dependencies, and start the desired script.
+Make sure to adjust the config-file in the `src` directory before running any scripts.
 
 ```shell
 python -m venv .venv
@@ -17,5 +18,5 @@ source .venv/bin/activate
 
 python -m pip install -r requirements.txt
 
-python src/basic_example.py
+python src/basic_example.py --config-path src/example_config.ini
 ```
