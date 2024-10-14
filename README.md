@@ -20,3 +20,11 @@ python -m pip install -r requirements.txt
 
 python src/basic_example.py --config-path src/example_config.ini
 ```
+
+
+### Command-line parameters
+
+- `--config-file` (_Path_, default: `src/config.ini`): Path to the configuration file.
+- `--max-tokens` (_int_, default: `300`): Maximum number of tokens to predict
+- `--prompt-file` (_Path_, default: `None`): Path to a file reading the prompt from (otherwise script asks for input)
+- `--timeout` (_float_, default: `300.0`): Timeout in seconds

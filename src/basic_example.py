@@ -23,6 +23,8 @@ def print_statistics(response: openai.Completion, delta: float):
     statistics = Statistics(**response.timings)
 
     print(f"Answer: {response.content}")
+    print("="*20)
+    print(f"Time: {delta} sec.")
     print(f"Prompt tokens: {statistics.prompt_n}")
     print(f"Predicted tokens: {statistics.predicted_n}")
     print(f"Total tokens: {statistics.prompt_n + statistics.predicted_n}")
@@ -40,11 +42,29 @@ def get_parser() -> argparse.ArgumentParser:
         default=Path(__file__).parent / "config.ini",
         type=Path,
     )
+    _parser.add_argument(
+        "--prompt-file",
+        help="Text file to read prompt from",
+        default=None,
+        type=Path,
+    )
+    _parser.add_argument(
+        "--max-tokens",
+        help="Maximum number of tokens",
+        default=300,
+        type=int,
+    )
+    _parser.add_argument(
+        "--timeout",
+        help="Timeout in seconds",
+        default=300.0,
+        type=float,
+    )
 
     return _parser
 
 
-def main(config_path: Path):
+def main(config_path: Path, prompt_file: Path, max_tokens: int, timeout: float):
     config = configparser.ConfigParser()
     with open(config_path) as f:
         config.read_file(f)
@@ -57,7 +77,12 @@ def main(config_path: Path):
         },
     )
     
-    prompt = input("Prompt: ")
+    if prompt_file:
+        with open(prompt_file) as f:
+            prompt = f.read()
+    else:
+        prompt = input("Prompt: ")
+
     if not prompt:
         prompt = "Question: What is the capital city of Germany? Answer: "
 
@@ -68,7 +93,8 @@ def main(config_path: Path):
     response = client.completions.create(
         prompt=prompt,
         model="",
-        max_tokens=100
+        max_tokens=max_tokens,
+        timeout=timeout,
     )
     end = time.time()
     print("Done.")
@@ -81,4 +107,4 @@ def main(config_path: Path):
 if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
-    main(args.config_path)
+    main(args.config_path, args.prompt_file, args.max_tokens, args.timeout)
